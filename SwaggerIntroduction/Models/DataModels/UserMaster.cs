@@ -1,7 +1,6 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 
 namespace SwaggerIntroduction.Models.DataModels
 {
@@ -45,7 +44,7 @@ namespace SwaggerIntroduction.Models.DataModels
         public DateTime CreationDate { get; set; }
     }
 
-    public class UserMaster : IdentityUser, IDataObject
+    public class UserMaster : IDataObject
     {
         [Key]
         public int UserId { get; set; }
@@ -53,5 +52,7 @@ namespace SwaggerIntroduction.Models.DataModels
         public string UserEmail { get; set; }
 
         public string UserPassword { get; set; }
+
+        public string Salt { get; set; }
     }
 }

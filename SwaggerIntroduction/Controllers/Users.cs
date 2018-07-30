@@ -3,17 +3,23 @@ using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SwaggerIntroduction.Models;
 using SwaggerIntroduction.Models.ApiModels;
 using SwaggerIntroduction.Models.DataModels;
 using SwaggerIntroduction.Repository;
+using SwaggerIntroduction.Security;
 
 namespace SwaggerIntroduction.Controllers
 {
     [Route("api/users")]
     public class Users : BaseController<Users>
     {
-        public Users(IUserRepository repo, ILogger<Users> logger, IMapper mapper) : base(repo, logger, mapper)
+        private readonly PasswordHashingHelper _passwordHashingHelper;
+
+        public Users(IUserRepository repo, ILogger<Users> logger, IMapper mapper, IOptions<AppSettingsConfigurationModel> settings, IHandleTokens tokenHandler) : base(repo, logger, mapper, settings, tokenHandler)
         {
+            _passwordHashingHelper = new PasswordHashingHelper(AppSettings.Value.PasswordAdditive);
         }
 
         [HttpGet]
@@ -25,11 +31,23 @@ namespace SwaggerIntroduction.Controllers
                 return BadRequest(ModelState);
             }
 
-            return Ok(Repo.GetUserMaster(1));
+            var currentUserClaims = HttpContext.User;
+            var email = TokenHandler.GetEmailFromClaims(currentUserClaims);
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return StatusCode(500);
+            }
+
+            var returnObject = new GetUserDetailsResponse();
+            var userMaster = Repo.GetUserMaster(email);
+            returnObject = Mapper.Map(userMaster, returnObject);
+            var userDetails = Repo.GetUserDetails(userMaster.UserId);
+            returnObject = Mapper.Map(userDetails, returnObject);
+            return Ok(returnObject);
         }
 
         [HttpPost]
-        [Authorize]
         public async Task<IActionResult> RegisterUser([FromBody] CreateUserRequestModel createUserRequestModel)
         {
             if (!ModelState.IsValid)
@@ -38,6 +56,13 @@ namespace SwaggerIntroduction.Controllers
             }
 
             var userMaster = Mapper.Map<UserMaster>(createUserRequestModel);
+            (userMaster.Salt, userMaster.UserPassword) =
+                _passwordHashingHelper.GetHashedPassword(createUserRequestModel.UserPassword);
+
+            if (userMaster.Salt == null || userMaster.UserPassword == null)
+            {
+                return StatusCode(500);
+            }
 
             await Repo.AddDataToDataSet(userMaster);
             var result = Repo.SaveData();
@@ -50,7 +75,6 @@ namespace SwaggerIntroduction.Controllers
 
             createUserRequestModel = Mapper.Map(userMaster, createUserRequestModel);
             var userDetails = Mapper.Map<UserDetails>(createUserRequestModel);
-
             await Repo.AddDataToDataSet(userDetails);
             result = Repo.SaveData();
             if (result == 1)

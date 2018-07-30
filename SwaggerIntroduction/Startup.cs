@@ -1,15 +1,16 @@
-﻿using AutoMapper;
+﻿using System.Text;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json.Serialization;
-using SwaggerIntroduction.Models.ApiModels;
-using SwaggerIntroduction.Models.DataModels;
+using SwaggerIntroduction.Models;
 using SwaggerIntroduction.Repository;
+using SwaggerIntroduction.Security;
 
 namespace SwaggerIntroduction
 {
@@ -37,11 +38,27 @@ namespace SwaggerIntroduction
                     options.SerializerSettings.ContractResolver = new DefaultContractResolver();
                 });
 
+            services.Configure<AppSettingsConfigurationModel>(Configuration.GetSection("AppSettings"));
             services.AddDbContext<UserDbContext>(options => options.UseSqlServer(Configuration.GetConnectionString("dbConnection")));
             services.AddScoped<IUserRepository, UserRepository>();
-            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme);
+            services.AddScoped<IHandleTokens, TokenHelper>();
             services.AddAutoMapper();
-            services.AddIdentity<TokenRequestModel, IdentityRole>().AddEntityFrameworkStores<UserDbContext>();
+
+            var configurationSectionValue = Configuration.GetSection("AppSettings:SigningKey").Value;
+            var key = Encoding.UTF8.GetBytes(configurationSectionValue);
+            services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+            {
+                options.TokenValidationParameters = new TokenValidationParameters()
+                {
+                    ValidateIssuerSigningKey = true,
+                    IssuerSigningKey = new SymmetricSecurityKey(key),
+                    ValidateLifetime = true,
+                    ValidAudience = "https://localhost:44334/api",
+                    ValidIssuer = "https://localhost:44334/api"
+                };
+            });
+
+            services.AddOptions();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -53,8 +70,8 @@ namespace SwaggerIntroduction
             }
 
             app.UseAuthentication();
+
             app.UseMvc();
-            app.UseAuthentication();
         }
     }
 }

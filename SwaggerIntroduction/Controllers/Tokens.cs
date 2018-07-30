@@ -1,22 +1,23 @@
 ﻿using System.Threading.Tasks;
 using AutoMapper;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using SwaggerIntroduction.Models;
 using SwaggerIntroduction.Models.ApiModels;
-using SwaggerIntroduction.Models.DataModels;
 using SwaggerIntroduction.Repository;
+using SwaggerIntroduction.Security;
 
 namespace SwaggerIntroduction.Controllers
 {
     [Route("api/tokens")]
     public class Tokens : BaseController<Tokens>
     {
-        private readonly SignInManager<TokenRequestModel> _signInManager;
+        private readonly PasswordHashingHelper _passwordHashingHelper;
 
-        public Tokens(IUserRepository repo, ILogger<Tokens> logger, IMapper mapper, SignInManager<TokenRequestModel> signInManager) : base(repo, logger, mapper)
+        public Tokens(IUserRepository repo, ILogger<Tokens> logger, IMapper mapper, IOptions<AppSettingsConfigurationModel> settings, IHandleTokens tokenHandler) : base(repo, logger, mapper, settings, tokenHandler)
         {
-            _signInManager = signInManager;
+            _passwordHashingHelper = new PasswordHashingHelper(AppSettings.Value.PasswordAdditive);
         }
 
         [HttpPost]
@@ -27,28 +28,28 @@ namespace SwaggerIntroduction.Controllers
                 return BadRequest(ModelState);
             }
 
-            // Validation.Validate(FromBodyAttribute.GetCustomAttributes());
-            var token = new TokenResponseModel();
-            return Ok(token);
-        }
-
-        [HttpPost("login")]
-        public async Task<IActionResult> Login([FromBody] UserMaster model)
-        {
-            if (!ModelState.IsValid)
+            var details = Repo.GetUserMaster(requestModelModel.UserEmail);
+            if (details == null)
             {
-                return BadRequest(ModelState);
+                return BadRequest("User validation failed");
             }
 
-            var result = await _signInManager.PasswordSignInAsync(model.UserEmail,
-                model.UserPassword, false, false);
+            var hashedPassword = _passwordHashingHelper.HashValues(requestModelModel.Password, _passwordHashingHelper.GetSaltFromString(details.Salt));
 
-            if (result.Succeeded)
+            if (!string.Equals(hashedPassword, details.UserPassword))
             {
-                return Ok();
+                return BadRequest("User validation failed");
             }
 
-            return BadRequest();
+            var token = TokenHandler.Create(requestModelModel.UserEmail, AppSettings.Value.SigningKey);
+
+            var tokenModel = new TokenResponseModel()
+            {
+                UserEmail = requestModelModel.UserEmail,
+                BearerToken = token
+            };
+
+            return Ok(tokenModel);
         }
     }
 }

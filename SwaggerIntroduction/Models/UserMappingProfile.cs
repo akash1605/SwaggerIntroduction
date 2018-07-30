@@ -14,6 +14,7 @@ namespace SwaggerIntroduction.Models
             CreateUserObjectMap();
             CraeteAddressMap();
             CreateRequestTokenUserMap();
+            GetUserDetailsMap();
         }
 
         private void CraeteAddressMap()
@@ -25,12 +26,23 @@ namespace SwaggerIntroduction.Models
         {
             CreateMap<CreateUserRequestModel, CreateUserResponseModel>();
             CreateMap<CreateUserRequestModel, UserMaster>()
+                .ForMember(destination => destination.UserPassword, opt => opt.Ignore())
                 .ReverseMap()
                 .ForMember(destination => destination.FirstName, opt => opt.Ignore())
                 .ForMember(destination => destination.LastName, opt => opt.Ignore());
             CreateMap<CreateUserRequestModel, UserDetails>().
                 ForMember(destination => destination.CreationDate, opt => opt.MapFrom(src => DateTime.UtcNow))
                 .ReverseMap();
+        }
+
+        private void GetUserDetailsMap()
+        {
+            CreateMap<UserMaster, GetUserDetailsResponse>()
+                .ForMember(destination => destination.CreationDate, opt => opt.Ignore())
+                .ForMember(destination => destination.FirstName, opt => opt.Ignore())
+                .ForMember(destination => destination.LastName, opt => opt.Ignore());
+            CreateMap<UserDetails, GetUserDetailsResponse>()
+                .ForMember(destination => destination.UserEmail, opt => opt.Ignore());
         }
 
         private void CreateRequestTokenUserMap()

@@ -1,9 +1,8 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Identity;
 
 namespace SwaggerIntroduction.Models.ApiModels
 {
-    public class TokenRequestModel : IdentityUser, IApiRequest
+    public class TokenRequestModel :  IApiRequest
     {
         [Required, EmailAddress]
         public string UserEmail { get; set; }

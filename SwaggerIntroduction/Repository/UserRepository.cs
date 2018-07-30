@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using SwaggerIntroduction.Models.DataModels;
@@ -16,10 +17,17 @@ namespace SwaggerIntroduction.Repository
 
         public UserMaster GetUserMaster(int userId)
         {
-            using (_context)
-            {
-                return _context.UserMaster.Find(userId);
-            }
+            return _context.UserMaster.Find(userId);
+        }
+
+        public UserMaster GetUserMaster(string emailId)
+        {
+            return _context.UserMaster.FirstOrDefault(user => string.Equals(user.UserEmail, emailId));
+        }
+
+        public UserDetails GetUserDetails(int userId)
+        {
+            return _context.UserDetails.FirstOrDefault(user => Equals(user.UserId, userId));
         }
 
         public async Task<T> AddDataToDataSet<T>(T data) where T : class
@@ -48,6 +56,10 @@ namespace SwaggerIntroduction.Repository
     public interface IUserRepository
     {
         UserMaster GetUserMaster(int userId);
+
+        UserMaster GetUserMaster(string emailId);
+
+        UserDetails GetUserDetails(int userId);
 
         Task<T> AddDataToDataSet<T>(T data) where T : class;
 
