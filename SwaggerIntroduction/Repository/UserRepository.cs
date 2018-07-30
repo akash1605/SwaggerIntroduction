@@ -30,6 +30,11 @@ namespace SwaggerIntroduction.Repository
             return _context.UserDetails.FirstOrDefault(user => Equals(user.UserId, userId));
         }
 
+        public async Task<UserAddress> GetUserAddress(int addressId)
+        {
+            return await _context.UserAddress.FindAsync(addressId);
+        }
+
         public async Task<T> AddDataToDataSet<T>(T data) where T : class
         {
             var dataSet = _context.GetDbSet<T>();
@@ -122,6 +127,11 @@ namespace SwaggerIntroduction.Repository
             }
         }
 
+        public void DeleteAddress(UserAddress address)
+        {
+            _context.UserAddress.Remove(address);
+        }
+
         public int SaveData()
         {
             return _context.SaveChanges();
@@ -136,6 +146,8 @@ namespace SwaggerIntroduction.Repository
 
         UserDetails GetUserDetails(int userId);
 
+        Task<UserAddress> GetUserAddress(int addressId);
+
         Task<T> AddDataToDataSet<T>(T data) where T : class;
 
         Task<int> SaveDataAsync();
@@ -147,5 +159,7 @@ namespace SwaggerIntroduction.Repository
         int SaveData();
 
         void UpdateParticularAddress(int addressId, UserAddress address);
+
+        void DeleteAddress(UserAddress address);
     }
 }

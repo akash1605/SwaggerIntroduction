@@ -53,6 +53,12 @@ namespace SwaggerIntroduction.Controllers
                 return BadRequest(ModelState);
             }
 
+            var masterResult = Repo.GetUserMaster(createUserRequestModel.UserEmail);
+            if (masterResult != null)
+            {
+                return Ok("Exists");
+            }
+
             var userMaster = Mapper.Map<UserMaster>(createUserRequestModel);
             (userMaster.Salt, userMaster.UserPassword) =
                 _passwordHashingHelper.GetHashedPassword(createUserRequestModel.UserPassword);
@@ -77,8 +83,16 @@ namespace SwaggerIntroduction.Controllers
             result = Repo.SaveData();
             if (result == 1)
             {
+                var token = TokenHandler.Create(createUserRequestModel.UserEmail, AppSettings.Value.SigningKey);
+                if (string.IsNullOrEmpty(token))
+                {
+                    return StatusCode(500);
+                }
+
                 createUserRequestModel = Mapper.Map(userDetails, createUserRequestModel);
-                return Created("api/users", Mapper.Map<CreateUserResponseModel>(createUserRequestModel));
+                var returnobject = Mapper.Map<CreateUserResponseModel>(createUserRequestModel);
+                returnobject.Token = token;
+                return Created("api/users", returnobject);
             }
 
             Logger.LogWarning("Failed to save data in user details table");
@@ -94,18 +108,11 @@ namespace SwaggerIntroduction.Controllers
                 return BadRequest(ModelState);
             }
 
-            var isOperationSuccessful = Getemail(out var email);
-            if (!isOperationSuccessful)
-            {
-                return StatusCode(500);
-            }
-
-            var result = Repo.GetUserMaster(email);
+            var result = GetUserMasterDetails();
             if (result == null)
             {
                 return StatusCode(500);
             }
-
 
             var userOldPassword = _passwordHashingHelper.HashValues(model.OldPassword, _passwordHashingHelper.GetSaltFromString(result.Salt));
             if (!string.Equals(result.UserPassword, userOldPassword))
@@ -120,7 +127,7 @@ namespace SwaggerIntroduction.Controllers
             Repo.UpdateMasterInformation(result);
             var saveResult = Repo.SaveData();
 
-            if (saveResult != 1)
+            if (saveResult == 3)
             {
                 return BadRequest();
             }
@@ -137,13 +144,7 @@ namespace SwaggerIntroduction.Controllers
                 return BadRequest(ModelState);
             }
 
-            var isOperationSuccessful = Getemail(out var email);
-            if (!isOperationSuccessful)
-            {
-                return StatusCode(500);
-            }
-
-            var result = Repo.GetUserMaster(email);
+            var result = GetUserMasterDetails();
             if (result == null)
             {
                 return StatusCode(500);
@@ -160,7 +161,7 @@ namespace SwaggerIntroduction.Controllers
 
             var saveResult = Repo.SaveData();
 
-            if (saveResult != 1 || saveResult != 2)
+            if (saveResult == 3)
             {
                 return StatusCode(500);
             }
@@ -172,13 +173,7 @@ namespace SwaggerIntroduction.Controllers
         [Authorize]
         public IActionResult UpdateSingleAddress([FromBody] AddAddressModel model, [FromRoute] int id)
         {
-            var isOperationSuccessful = Getemail(out var email);
-            if (!isOperationSuccessful)
-            {
-                return StatusCode(500);
-            }
-
-            var result = Repo.GetUserMaster(email);
+            var result = GetUserMasterDetails();
             if (result == null)
             {
                 return StatusCode(500);
@@ -199,6 +194,39 @@ namespace SwaggerIntroduction.Controllers
             }
 
             return StatusCode(500);
+        }
+
+        [HttpDelete("address/{id}")]
+        [Authorize]
+        public IActionResult DeleteUserAddress([FromRoute] int id)
+        {
+            var result = GetUserMasterDetails();
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            var addressResult = Repo.GetUserAddress(id).Result;
+            if (addressResult == null)
+            {
+                return NotFound("No such address error");
+            }
+
+            if (result.UserId != addressResult.UserId)
+            {
+                return NotFound("No such address error");
+            }
+
+            Repo.DeleteAddress(addressResult);
+            var saveResult = Repo.SaveData();
+
+            return saveResult == 3 ? StatusCode(500) : Ok();
+        }
+
+        private UserMaster GetUserMasterDetails()
+        {
+            var isOperationSuccessful = Getemail(out var email);
+            return !isOperationSuccessful ? null : Repo.GetUserMaster(email);
         }
 
         private bool Getemail(out string email)

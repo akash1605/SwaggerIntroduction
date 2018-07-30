@@ -42,6 +42,11 @@ namespace SwaggerIntroduction.Controllers
 
             var token = TokenHandler.Create(requestModelModel.UserEmail, AppSettings.Value.SigningKey);
 
+            if (string.IsNullOrEmpty(token))
+            {
+                return StatusCode(500);
+            }
+
             var tokenModel = new TokenResponseModel()
             {
                 UserEmail = requestModelModel.UserEmail,
