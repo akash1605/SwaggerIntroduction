@@ -25,8 +25,8 @@ namespace SwaggerIntroduction.Models.ApiModels
         public string Postcode { get; set; }
 
         [Required]
-        public int PhoneNumber { get; set; }
+        public int? PhoneNumber { get; set; }
 
-        public bool MarkAsDefault { get; set; }
+        public bool? MarkAsDefault { get; set; }
     }
 }

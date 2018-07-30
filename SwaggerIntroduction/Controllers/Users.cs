@@ -153,7 +153,7 @@ namespace SwaggerIntroduction.Controllers
             addressDetails.UserId = result.UserId;
 
             Repo.AddDataToDataSet(addressDetails);
-            if (model.MarkAsDefault)
+            if (model.MarkAsDefault != null && model.MarkAsDefault == true)
             {
                 Repo.UnMarkUserAddressNotDefault(result.UserId);
             }
@@ -166,6 +166,39 @@ namespace SwaggerIntroduction.Controllers
             }
 
             return Created("api/users/address", model);
+        }
+
+        [HttpPut("address/{id}")]
+        [Authorize]
+        public IActionResult UpdateSingleAddress([FromBody] AddAddressModel model, [FromRoute] int id)
+        {
+            var isOperationSuccessful = Getemail(out var email);
+            if (!isOperationSuccessful)
+            {
+                return StatusCode(500);
+            }
+
+            var result = Repo.GetUserMaster(email);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            if (model.MarkAsDefault != null && model.MarkAsDefault == true)
+            {
+                Repo.UnMarkUserAddressNotDefault(result.UserId);
+            }
+
+            var addressDetails = Mapper.Map<UserAddress>(model);
+            Repo.UpdateParticularAddress(id, addressDetails);
+            var saveResult = Repo.SaveData();
+
+            if (saveResult == 1 || saveResult == 2 || saveResult == 0)
+            {
+                return Ok();
+            }
+
+            return StatusCode(500);
         }
 
         private bool Getemail(out string email)
