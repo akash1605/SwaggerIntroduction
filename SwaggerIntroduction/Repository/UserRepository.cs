@@ -47,6 +47,18 @@ namespace SwaggerIntroduction.Repository
             return await _context.SaveChangesAsync();
         }
 
+        public void UpdateMasterInformation(UserMaster data)
+        {
+            var result = _context.UserMaster.Find(data.UserId);
+            if (result == null)
+            {
+                throw new DbUpdateException($"Couldnt get data for userId {data.UserId}", new Exception());
+            }
+
+            result.UserPassword = data.UserPassword;
+            result.Salt = data.Salt;
+        }
+
         public int SaveData()
         {
             return _context.SaveChanges();
@@ -64,6 +76,8 @@ namespace SwaggerIntroduction.Repository
         Task<T> AddDataToDataSet<T>(T data) where T : class;
 
         Task<int> SaveDataAsync();
+
+        void UpdateMasterInformation(UserMaster data);
 
         int SaveData();
     }

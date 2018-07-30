@@ -31,10 +31,8 @@ namespace SwaggerIntroduction.Controllers
                 return BadRequest(ModelState);
             }
 
-            var currentUserClaims = HttpContext.User;
-            var email = TokenHandler.GetEmailFromClaims(currentUserClaims);
-
-            if (string.IsNullOrEmpty(email))
+            var isOperationSuccessful = Getemail(out var email);
+            if (!isOperationSuccessful)
             {
                 return StatusCode(500);
             }
@@ -87,16 +85,54 @@ namespace SwaggerIntroduction.Controllers
             return BadRequest("could not add a valid value. \n");
         }
 
-        [HttpPut("updatePassword")]
+        [HttpPut("editpassword")]
         [Authorize]
-        public IActionResult UpdateUserPassword()
+        public IActionResult UpdateUserPassword([FromBody] UpdatePasswordRequestModel model)
         {
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
             }
 
-            return Ok();
+            var isOperationSuccessful = Getemail(out var email);
+            if (!isOperationSuccessful)
+            {
+                return StatusCode(500);
+            }
+
+            var result = Repo.GetUserMaster(email);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+
+            var userOldPassword = _passwordHashingHelper.HashValues(model.OldPassword, _passwordHashingHelper.GetSaltFromString(result.Salt));
+            if (!string.Equals(result.UserPassword, userOldPassword))
+            {
+                return BadRequest("Update failed");
+            }
+
+            var (salt, userNewPassword) = _passwordHashingHelper.GetHashedPassword(model.NewPassword);
+            result.UserPassword = userNewPassword;
+            result.Salt = salt;
+
+            Repo.UpdateMasterInformation(result);
+            var saveResult = Repo.SaveData();
+
+            if (saveResult != 1)
+            {
+                return BadRequest();
+            }
+
+            return Ok("Password Updated!");
+        }
+
+        private bool Getemail(out string email)
+        {
+            var currentUserClaims = HttpContext.User;
+            email = TokenHandler.GetEmailFromClaims(currentUserClaims);
+            return !string.IsNullOrEmpty(email);
         }
     }
 }

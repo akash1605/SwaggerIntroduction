@@ -18,8 +18,8 @@ namespace SwaggerIntroduction.Models.ApiModels
 
         [Required]
         [MaxLength(20)]
+        [MinLength(8)]
         public string UserPassword { get; set; }
-
 
         [Required]
         [MaxLength(225)]
