@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
@@ -127,6 +128,11 @@ namespace SwaggerIntroduction.Repository
             }
         }
 
+        public IEnumerable<UserAddress> GetUserAddresses(int userId)
+        {
+            return _context.UserAddress.Where(addressDetails => addressDetails.UserId == userId);
+        }
+
         public void DeleteAddress(UserAddress address)
         {
             _context.UserAddress.Remove(address);
@@ -147,6 +153,8 @@ namespace SwaggerIntroduction.Repository
         UserDetails GetUserDetails(int userId);
 
         Task<UserAddress> GetUserAddress(int addressId);
+
+        IEnumerable<UserAddress> GetUserAddresses(int userId);
 
         Task<T> AddDataToDataSet<T>(T data) where T : class;
 

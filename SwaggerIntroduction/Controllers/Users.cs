@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.Linq;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -133,6 +134,48 @@ namespace SwaggerIntroduction.Controllers
             }
 
             return Ok("Password Updated!");
+        }
+
+        [HttpGet("address")]
+        [Authorize]
+        public IActionResult GetUserAddresses()
+        {
+            var result = GetUserMasterDetails();
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            var addressResultList = Repo.GetUserAddresses(result.UserId);
+            var returnObjectList = addressResultList.Select(address => Mapper.Map<AddAddressModel>(address)).ToList();
+            return Ok(returnObjectList);
+        }
+
+        [HttpGet("address/{id}")]
+        [Authorize]
+        public IActionResult GetUserAddress([FromRoute] int id)
+        {
+            var result = GetUserMasterDetails();
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            var addressResultList = Repo.GetUserAddress(id).Result;
+
+            if (addressResultList == null)
+            {
+                return NotFound();
+            }
+
+            if (result.UserId != addressResultList.UserId)
+            {
+                return NotFound();
+            }
+
+            var returnObject = Mapper.Map<AddAddressModel>(addressResultList);
+
+            return Ok(returnObject);
         }
 
         [HttpPost("address")]

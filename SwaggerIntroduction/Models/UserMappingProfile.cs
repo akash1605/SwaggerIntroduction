@@ -21,7 +21,9 @@ namespace SwaggerIntroduction.Models
         private void AddAddressMap()
         {
             CreateMap<AddAddressModel, UserAddress>()
-                .ForMember(destination => destination.IsDefaultAddress, opt => opt.MapFrom(scource => scource.MarkAsDefault));
+                .ForMember(destination => destination.IsDefaultAddress, opt => opt.MapFrom(scource => scource.MarkAsDefault))
+                .ReverseMap()
+                .ForMember(destination => destination.MarkAsDefault, opt => opt.MapFrom(source => source.IsDefaultAddress));
         }
 
         private void CraeteAddressMap()
