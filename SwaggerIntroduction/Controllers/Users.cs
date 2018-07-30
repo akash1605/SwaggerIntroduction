@@ -128,6 +128,46 @@ namespace SwaggerIntroduction.Controllers
             return Ok("Password Updated!");
         }
 
+        [HttpPost("address")]
+        [Authorize]
+        public IActionResult AddAddress([FromBody] AddAddressModel model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var isOperationSuccessful = Getemail(out var email);
+            if (!isOperationSuccessful)
+            {
+                return StatusCode(500);
+            }
+
+            var result = Repo.GetUserMaster(email);
+            if (result == null)
+            {
+                return StatusCode(500);
+            }
+
+            var addressDetails = Mapper.Map<UserAddress>(model);
+            addressDetails.UserId = result.UserId;
+
+            Repo.AddDataToDataSet(addressDetails);
+            if (model.MarkAsDefault)
+            {
+                Repo.UnMarkUserAddressNotDefault(result.UserId);
+            }
+
+            var saveResult = Repo.SaveData();
+
+            if (saveResult != 1 || saveResult != 2)
+            {
+                return StatusCode(500);
+            }
+
+            return Created("api/users/address", model);
+        }
+
         private bool Getemail(out string email)
         {
             var currentUserClaims = HttpContext.User;

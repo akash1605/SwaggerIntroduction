@@ -2,7 +2,7 @@
 
 namespace SwaggerIntroduction.Models.ApiModels
 {
-    public class AddressModel : IApiRequest
+    public class AddAddressModel : IApiRequest
     {
         [Required]
         [MaxLength(200)]
@@ -27,6 +27,6 @@ namespace SwaggerIntroduction.Models.ApiModels
         [Required]
         public int PhoneNumber { get; set; }
 
-        public bool IsDefaultAddress { get; set; }
+        public bool MarkAsDefault { get; set; }
     }
 }

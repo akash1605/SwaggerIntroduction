@@ -15,11 +15,18 @@ namespace SwaggerIntroduction.Models
             CraeteAddressMap();
             CreateRequestTokenUserMap();
             GetUserDetailsMap();
+            AddAddressMap();
+        }
+
+        private void AddAddressMap()
+        {
+            CreateMap<AddAddressModel, UserAddress>()
+                .ForMember(destination => destination.IsDefaultAddress, opt => opt.MapFrom(scource => scource.MarkAsDefault));
         }
 
         private void CraeteAddressMap()
         {
-            CreateMap<UserAddress, AddressModel>().ReverseMap();
+            CreateMap<UserAddress, AddAddressModel>().ReverseMap();
         }
 
         private void CreateUserObjectMap()

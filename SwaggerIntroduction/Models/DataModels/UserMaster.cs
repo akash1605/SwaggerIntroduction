@@ -24,9 +24,9 @@ namespace SwaggerIntroduction.Models.DataModels
 
         public string Postcode { get; set; }
 
-        public int PhoneNumber { get; set; }
+        public int? PhoneNumber { get; set; }
 
-        public bool IsDefaultAddress { get; set; }
+        public bool? IsDefaultAddress { get; set; }
     }
 
     public class UserDetails : IDataObject
