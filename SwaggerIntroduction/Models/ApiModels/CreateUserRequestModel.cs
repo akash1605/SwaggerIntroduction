@@ -1,17 +1,10 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
-using Microsoft.AspNetCore.Mvc;
 
 namespace SwaggerIntroduction.Models.ApiModels
 {
     public class CreateUserRequestModel : IApiRequest
     {
-        [HiddenInput]
-        public int UserId { get; set; }
-
-        [HiddenInput]
-        public DateTime CreationDate { get; set; }
-
         [Required, EmailAddress]
         [MaxLength(225)]
         public string UserEmail { get; set; }

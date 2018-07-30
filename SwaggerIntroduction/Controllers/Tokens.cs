@@ -20,6 +20,9 @@ namespace SwaggerIntroduction.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(TokenResponseModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(500)]
         public IActionResult CreateToken([FromBody] TokenRequestModel requestModelModel)
         {
             if (!ModelState.IsValid)

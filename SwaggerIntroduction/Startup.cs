@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Collections.Generic;
+using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -11,6 +12,7 @@ using Newtonsoft.Json.Serialization;
 using SwaggerIntroduction.Models;
 using SwaggerIntroduction.Repository;
 using SwaggerIntroduction.Security;
+using Swashbuckle.AspNetCore.Swagger;
 
 namespace SwaggerIntroduction
 {
@@ -43,7 +45,30 @@ namespace SwaggerIntroduction
             services.AddScoped<IUserRepository, UserRepository>();
             services.AddScoped<IHandleTokens, TokenHelper>();
             services.AddAutoMapper();
+            services.AddSwaggerGen(swag =>
+            {
+                swag.SwaggerDoc("v1", new Info
+                {
+                    Title = "User Api",
+                    Version = "v1",
+                    Description = "These Api help in user management"
+                });
 
+                var security = new Dictionary<string, IEnumerable<string>>
+                {
+                    {"Bearer", new string[] { }},
+                };
+
+                swag.AddSecurityDefinition("Bearer", new ApiKeyScheme
+                {
+                    Description = "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\"",
+                    Name = "Authorization",
+                    In = "header",
+                    Type = "apiKey"
+                });
+
+                swag.AddSecurityRequirement(security);
+            });
             var configurationSectionValue = Configuration.GetSection("AppSettings:SigningKey").Value;
             var key = Encoding.UTF8.GetBytes(configurationSectionValue);
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
@@ -70,7 +95,8 @@ namespace SwaggerIntroduction
             }
 
             app.UseAuthentication();
-
+            app.UseSwagger();
+            app.UseSwaggerUI(swagUi => swagUi.SwaggerEndpoint("/swagger/v1/swagger.json", "User API v1"));
             app.UseMvc();
         }
     }

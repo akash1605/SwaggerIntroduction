@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authorization;
@@ -25,6 +26,10 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpGet]
         [Authorize]
+        [ProducesResponseType(typeof(GetUserDetailsResponse), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
         public IActionResult GetUserProfile()
         {
             if (!ModelState.IsValid)
@@ -35,7 +40,7 @@ namespace SwaggerIntroduction.Controllers
             var isOperationSuccessful = Getemail(out var email);
             if (!isOperationSuccessful)
             {
-                return StatusCode(500);
+                return NotFound();
             }
 
             var returnObject = new GetUserDetailsResponse();
@@ -47,6 +52,9 @@ namespace SwaggerIntroduction.Controllers
         }
 
         [HttpPost]
+        [ProducesResponseType(typeof(CreateUserResponseModel), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(404)]
         public async Task<IActionResult> RegisterUser([FromBody] CreateUserRequestModel createUserRequestModel)
         {
             if (!ModelState.IsValid)
@@ -102,6 +110,9 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpPut("editpassword")]
         [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
         public IActionResult UpdateUserPassword([FromBody] UpdatePasswordRequestModel model)
         {
             if (!ModelState.IsValid)
@@ -138,6 +149,9 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpGet("address")]
         [Authorize]
+        [ProducesResponseType(typeof(List<AddAddressModel>), 200)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(401)]
         public IActionResult GetUserAddresses()
         {
             var result = GetUserMasterDetails();
@@ -153,6 +167,8 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpGet("address/{id}")]
         [Authorize]
+        [ProducesResponseType(typeof(AddAddressModel), 200)]
+        [ProducesResponseType(404)]
         public IActionResult GetUserAddress([FromRoute] int id)
         {
             var result = GetUserMasterDetails();
@@ -180,6 +196,9 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpPost("address")]
         [Authorize]
+        [ProducesResponseType(typeof(AddAddressModel), 201)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(401)]
         public IActionResult AddAddress([FromBody] AddAddressModel model)
         {
             if (!ModelState.IsValid)
@@ -214,6 +233,9 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpPut("address/{id}")]
         [Authorize]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(401)]
         public IActionResult UpdateSingleAddress([FromBody] AddAddressModel model, [FromRoute] int id)
         {
             var result = GetUserMasterDetails();
@@ -241,6 +263,10 @@ namespace SwaggerIntroduction.Controllers
 
         [HttpDelete("address/{id}")]
         [Authorize]
+        [ProducesResponseType( 200)]
+        [ProducesResponseType(500)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(401)]
         public IActionResult DeleteUserAddress([FromRoute] int id)
         {
             var result = GetUserMasterDetails();
