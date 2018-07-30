@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Text;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -67,6 +68,8 @@ namespace SwaggerIntroduction
                     Type = "apiKey"
                 });
 
+                var xmlPath = AppDomain.CurrentDomain.BaseDirectory;
+                swag.IncludeXmlComments($"{xmlPath}/SwaggerIntroduction.xml");
                 swag.AddSecurityRequirement(security);
             });
             var configurationSectionValue = Configuration.GetSection("AppSettings:SigningKey").Value;

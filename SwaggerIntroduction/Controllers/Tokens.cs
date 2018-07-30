@@ -19,6 +19,9 @@ namespace SwaggerIntroduction.Controllers
             _passwordHashingHelper = new PasswordHashingHelper(AppSettings.Value.PasswordAdditive);
         }
 
+        /// <summary>
+        /// Returns a token after validating a user.
+        /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(TokenResponseModel), 200)]
         [ProducesResponseType(400)]

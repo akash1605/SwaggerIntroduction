@@ -24,6 +24,9 @@ namespace SwaggerIntroduction.Controllers
             _passwordHashingHelper = new PasswordHashingHelper(AppSettings.Value.PasswordAdditive);
         }
 
+        /// <summary>
+        /// Returns user profile for a signed in user.
+        /// </summary>
         [HttpGet]
         [Authorize]
         [ProducesResponseType(typeof(GetUserDetailsResponse), 200)]
@@ -51,6 +54,9 @@ namespace SwaggerIntroduction.Controllers
             return Ok(returnObject);
         }
 
+        /// <summary>
+        /// Registers a new user
+        /// </summary>
         [HttpPost]
         [ProducesResponseType(typeof(CreateUserResponseModel), 201)]
         [ProducesResponseType(400)]
@@ -108,6 +114,9 @@ namespace SwaggerIntroduction.Controllers
             return BadRequest("could not add a valid value. \n");
         }
 
+        /// <summary>
+        /// Helps the user to set new password.
+        /// </summary>
         [HttpPut("editpassword")]
         [Authorize]
         [ProducesResponseType(200)]
@@ -147,6 +156,9 @@ namespace SwaggerIntroduction.Controllers
             return Ok("Password Updated!");
         }
 
+        /// <summary>
+        /// Returns all the addresses for a user.
+        /// </summary>
         [HttpGet("address")]
         [Authorize]
         [ProducesResponseType(typeof(List<AddAddressModel>), 200)]
@@ -165,6 +177,9 @@ namespace SwaggerIntroduction.Controllers
             return Ok(returnObjectList);
         }
 
+        /// <summary>
+        /// Returns the user address whose id is passed in.
+        /// </summary>
         [HttpGet("address/{id}")]
         [Authorize]
         [ProducesResponseType(typeof(AddAddressModel), 200)]
@@ -194,6 +209,9 @@ namespace SwaggerIntroduction.Controllers
             return Ok(returnObject);
         }
 
+        /// <summary>
+        /// Adds a new address for a signed in user.
+        /// </summary>
         [HttpPost("address")]
         [Authorize]
         [ProducesResponseType(typeof(AddAddressModel), 201)]
@@ -231,6 +249,9 @@ namespace SwaggerIntroduction.Controllers
             return Created("api/users/address", model);
         }
 
+        /// <summary>
+        /// Edits the given address for a user.
+        /// </summary>
         [HttpPut("address/{id}")]
         [Authorize]
         [ProducesResponseType(200)]
@@ -261,6 +282,9 @@ namespace SwaggerIntroduction.Controllers
             return StatusCode(500);
         }
 
+        /// <summary>
+        /// Deletes the given address for a user.
+        /// </summary>
         [HttpDelete("address/{id}")]
         [Authorize]
         [ProducesResponseType( 200)]

@@ -8,11 +8,11 @@
   "paths": {
     "/api/tokens": {
       "post": {
-        "security": [ "bearerAuth" ],
-        "tags": [ "Create Tokens" ],
+        "tags": [ "Tokens" ],
+        "summary": "Returns a token after validating a user.",
         "operationId": "ApiTokensPost",
         "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
-        "produces": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
         "parameters": [
           {
             "name": "requestModelModel",
@@ -22,267 +22,327 @@
           }
         ],
         "responses": {
-          "200": { "description": "Success" },
-          "404": { "description": "Not found" }
+          "200": {
+            "description": "Success",
+            "schema": { "$ref": "#/definitions/TokenResponseModel" }
+          },
+          "400": { "description": "Bad Request" },
+          "500": { "description": "Server Error" }
         }
       }
     },
     "/api/users": {
       "get": {
         "tags": [ "Users" ],
+        "summary": "Returns user profile for a signed in user.",
         "operationId": "ApiUsersGet",
         "consumes": [],
-        "produces": [
-          {
-            "UserEmail": "email@email.com",
-            "FirstName": "FirstName",
-            "LastName": "LastName",
-            "CreationDate": "Date"
-          }
-        ],
+        "produces": [ "text/plain", "application/json", "text/json" ],
         "parameters": [],
         "responses": {
+          "200": {
+            "description": "Success",
+            "schema": { "$ref": "#/definitions/GetUserDetailsResponse" }
+          },
+          "400": { "description": "Bad Request" },
+          "404": { "description": "Not Found" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "post": {
+        "tags": [ "Users" ],
+        "summary": "Registers a new user",
+        "operationId": "ApiUsersPost",
+        "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "createUserRequestModel",
+            "in": "body",
+            "required": false,
+            "schema": { "$ref": "#/definitions/CreateUserRequestModel" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "schema": { "$ref": "#/definitions/CreateUserResponseModel" }
+          },
+          "400": { "description": "Bad Request" },
+          "404": { "description": "Not Found" }
+        }
+      }
+    },
+    "/api/users/editpassword": {
+      "put": {
+        "tags": [ "Users" ],
+        "summary": "Helps the user to set new password.",
+        "operationId": "ApiUsersEditpasswordPut",
+        "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "body",
+            "required": false,
+            "schema": { "$ref": "#/definitions/UpdatePasswordRequestModel" }
+          }
+        ],
+        "responses": {
           "200": { "description": "Success" },
-          "400": { "description": "Not found" }
+          "400": { "description": "Bad Request" },
+          "401": { "description": "Unauthorized" }
         }
       }
     },
-    "post": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersPost",
-      "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
-      "produces": [],
-      "parameters": [
-        {
-          "name": "createUserRequestModel",
-          "in": "body",
-          "required": false,
-          "schema": { "$ref": "#/definitions/CreateUserRequestModel" }
+    "/api/users/address": {
+      "get": {
+        "tags": [ "Users" ],
+        "summary": "Returns all the addresses for a user.",
+        "operationId": "ApiUsersAddressGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": {
+              "uniqueItems": false,
+              "type": "array",
+              "items": { "$ref": "#/definitions/AddAddressModel" }
+            }
+          },
+          "500": { "description": "Server Error" },
+          "401": { "description": "Unauthorized" }
         }
-      ],
-      "responses": {
-        "201": { "description": "Created" },
-        "400": { "description": "Bad Request" },
-        "401": { "description": "UnAuthorized" },
-        "500": { "description": "Internal Error" }
-      }
-    }
-  },
-  "/api/users/editpassword": {
-    "put": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersEditpasswordPut",
-      "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
-      "produces": [],
-      "parameters": [
-        {
-          "name": "model",
-          "in": "body",
-          "required": false,
-          "schema": { "$ref": "#/definitions/UpdatePasswordRequestModel" }
+      },
+      "post": {
+        "tags": [ "Users" ],
+        "summary": "Adds a new address for a signed in user.",
+        "operationId": "ApiUsersAddressPost",
+        "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "body",
+            "required": false,
+            "schema": { "$ref": "#/definitions/AddAddressModel" }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Success",
+            "schema": { "$ref": "#/definitions/AddAddressModel" }
+          },
+          "500": { "description": "Server Error" },
+          "401": { "description": "Unauthorized" }
         }
-      ],
-      "responses": {
-        "200": { "description": "Success" },
-        "400": { "description": "Bad Request" },
-        "401": { "description": "UnAuthorized" },
-        "500": { "description": "Internal Error" }
-      }
-    }
-  },
-  "/api/users/address": {
-    "get": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersAddressGet",
-      "consumes": [],
-      "produces": [],
-      "parameters": [],
-      "responses": { "200": { "description": "Success" } }
-    },
-    "post": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersAddressPost",
-      "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
-      "produces": [],
-      "parameters": [
-        {
-          "name": "model",
-          "in": "body",
-          "required": false,
-          "schema": { "$ref": "#/definitions/AddAddressModel" }
-        }
-      ],
-      "responses": {
-        "201": { "description": "Created" },
-        "500": { "description": "Internal Error" }
-      }
-    }
-  },
-  "/api/users/address/{id}": {
-    "get": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersAddressByIdGet",
-      "consumes": [],
-      "produces": [],
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "type": "integer",
-          "format": "int32"
-        }
-      ],
-      "responses": {
-        "200": { "description": "Success" },
-        "404": { "description": "Not found" },
-        "401": { "description": "UnAuthorized" },
-        "500": { "description": "Internal Error" }
       }
     },
-    "put": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersAddressByIdPut",
-      "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
-      "produces": [],
-      "parameters": [
-        {
-          "name": "model",
-          "in": "body",
-          "required": false,
-          "schema": { "$ref": "#/definitions/AddAddressModel" }
+    "/api/users/address/{id}": {
+      "get": {
+        "tags": [ "Users" ],
+        "summary": "Returns the user address whose id is passed in.",
+        "operationId": "ApiUsersAddressByIdGet",
+        "consumes": [],
+        "produces": [ "text/plain", "application/json", "text/json" ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "schema": { "$ref": "#/definitions/AddAddressModel" }
+          },
+          "404": { "description": "Not Found" }
+        }
+      },
+      "put": {
+        "tags": [ "Users" ],
+        "summary": "Edits the given address for a user.",
+        "operationId": "ApiUsersAddressByIdPut",
+        "consumes": [ "application/json-patch+json", "application/json", "text/json", "application/*+json" ],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "model",
+            "in": "body",
+            "required": false,
+            "schema": { "$ref": "#/definitions/AddAddressModel" }
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Success" },
+          "500": { "description": "Server Error" },
+          "401": { "description": "Unauthorized" }
+        }
+      },
+      "delete": {
+        "tags": [ "Users" ],
+        "summary": "Deletes the given address for a user.",
+        "operationId": "ApiUsersAddressByIdDelete",
+        "consumes": [],
+        "produces": [],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "type": "integer",
+            "format": "int32"
+          }
+        ],
+        "responses": {
+          "200": { "description": "Success" },
+          "500": { "description": "Server Error" },
+          "404": { "description": "Not Found" },
+          "401": { "description": "Unauthorized" }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "TokenRequestModel": {
+      "required": [ "UserEmail", "Password" ],
+      "type": "object",
+      "properties": {
+        "UserEmail": { "type": "string" },
+        "Password": { "type": "string" }
+      }
+    },
+    "TokenResponseModel": {
+      "type": "object",
+      "properties": {
+        "UserEmail": { "type": "string" },
+        "BearerToken": { "type": "string" }
+      }
+    },
+    "GetUserDetailsResponse": {
+      "type": "object",
+      "properties": {
+        "UserEmail": { "type": "string" },
+        "FirstName": { "type": "string" },
+        "LastName": { "type": "string" },
+        "CreationDate": {
+          "format": "date-time",
+          "type": "string"
+        }
+      }
+    },
+    "CreateUserRequestModel": {
+      "required": [ "UserEmail", "UserPassword", "FirstName" ],
+      "type": "object",
+      "properties": {
+        "UserEmail": {
+          "maxLength": 225,
+          "type": "string"
         },
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "type": "integer",
-          "format": "int32"
+        "UserPassword": {
+          "maxLength": 20,
+          "minLength": 8,
+          "type": "string"
+        },
+        "FirstName": {
+          "maxLength": 225,
+          "type": "string"
+        },
+        "LastName": {
+          "maxLength": 225,
+          "type": "string"
         }
-      ],
-      "responses": {
-        "200": { "description": "Success" },
-        "404": { "description": "Not found" },
-        "401": { "description": "UnAuthorized" },
-        "500": { "description": "Internal Error" }
       }
     },
-    "delete": {
-      "tags": [ "Users" ],
-      "operationId": "ApiUsersAddressByIdDelete",
-      "consumes": [],
-      "produces": [],
-      "parameters": [
-        {
-          "name": "id",
-          "in": "path",
-          "required": true,
-          "type": "integer",
-          "format": "int32"
+    "CreateUserResponseModel": {
+      "type": "object",
+      "properties": {
+        "UserEmail": { "type": "string" },
+        "FirstName": { "type": "string" },
+        "LastName": { "type": "string" },
+        "Token": { "type": "string" },
+        "CreationDate": {
+          "format": "date-time",
+          "type": "string"
         }
-      ],
-      "responses": {
-        "200": { "description": "Success" },
-        "404": { "description": "Not found" },
-        "401": { "description": "UnAuthorized" },
-        "500": { "description": "Internal Error" }
       }
-    }
-  }
-}, "definitions": {
-  "TokenRequestModel": {
-    "required": [ "UserEmail", "Password" ],
-    "type": "object",
-    "properties": {
-      "UserEmail": { "type": "string" },
-      "Password": { "type": "string" }
-    }
-  },
-  "CreateUserRequestModel": {
-    "required": [ "UserEmail", "UserPassword", "FirstName" ],
-    "type": "object",
-    "properties": {
-      "UserId": {
-        "format": "int32",
-        "type": "integer"
-      },
-      "CreationDate": {
-        "format": "date-time",
-        "type": "string"
-      },
-      "UserEmail": {
-        "maxLength": 225,
-        "type": "string"
-      },
-      "UserPassword": {
-        "maxLength": 20,
-        "minLength": 8,
-        "type": "string"
-      },
-      "FirstName": {
-        "maxLength": 225,
-        "type": "string"
-      },
-      "LastName": {
-        "maxLength": 225,
-        "type": "string"
+    },
+    "UpdatePasswordRequestModel": {
+      "required": [ "OldPassword", "NewPassword", "ConfirmPassword" ],
+      "type": "object",
+      "properties": {
+        "OldPassword": {
+          "maxLength": 20,
+          "minLength": 8,
+          "type": "string"
+        },
+        "NewPassword": {
+          "maxLength": 20,
+          "minLength": 8,
+          "type": "string"
+        },
+        "ConfirmPassword": {
+          "maxLength": 20,
+          "minLength": 8,
+          "type": "string"
+        }
       }
-    }
-  },
-  "UpdatePasswordRequestModel": {
-    "required": [ "OldPassword", "NewPassword", "ConfirmPassword" ],
-    "type": "object",
-    "properties": {
-      "OldPassword": {
-        "maxLength": 20,
-        "minLength": 8,
-        "type": "string"
-      },
-      "NewPassword": {
-        "maxLength": 20,
-        "minLength": 8,
-        "type": "string"
-      },
-      "ConfirmPassword": {
-        "maxLength": 20,
-        "minLength": 8,
-        "type": "string"
+    },
+    "AddAddressModel": {
+      "required": [ "AddressLineOne", "Country", "PhoneNumber" ],
+      "type": "object",
+      "properties": {
+        "AddressLineOne": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "AddressLineTwo": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "City": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "State": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "Country": {
+          "maxLength": 200,
+          "type": "string"
+        },
+        "Postcode": {
+          "maxLength": 100,
+          "type": "string"
+        },
+        "PhoneNumber": {
+          "format": "int32",
+          "type": "integer"
+        },
+        "MarkAsDefault": { "type": "boolean" }
       }
     }
   },
-  "AddAddressModel": {
-    "required": [ "AddressLineOne", "Country", "PhoneNumber" ],
-    "type": "object",
-    "properties": {
-      "AddressLineOne": {
-        "maxLength": 200,
-        "type": "string"
-      },
-      "AddressLineTwo": {
-        "maxLength": 200,
-        "type": "string"
-      },
-      "City": {
-        "maxLength": 200,
-        "type": "string"
-      },
-      "State": {
-        "maxLength": 200,
-        "type": "string"
-      },
-      "Country": {
-        "maxLength": 200,
-        "type": "string"
-      },
-      "Postcode": {
-        "maxLength": 100,
-        "type": "string"
-      },
-      "PhoneNumber": {
-        "format": "int32",
-        "type": "integer"
-      },
-      "MarkAsDefault": { "type": "boolean" }
+  "securityDefinitions": {
+    "Bearer": {
+      "name": "Authorization",
+      "in": "header",
+      "type": "apiKey",
+      "description": "JWT Authorization header using the Bearer scheme. Example: \"Authorization: Bearer {token}\""
     }
-  }
-} }
+  },
+  "security": [ { "Bearer": [] } ]
+}
