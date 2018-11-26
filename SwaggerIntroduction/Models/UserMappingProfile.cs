@@ -12,7 +12,7 @@ namespace SwaggerIntroduction.Models
         public UserMappingProfile()
         {
             CreateUserObjectMap();
-            CraeteAddressMap();
+            CreateAddressMap();
             CreateRequestTokenUserMap();
             GetUserDetailsMap();
             AddAddressMap();
@@ -26,7 +26,7 @@ namespace SwaggerIntroduction.Models
                 .ForMember(destination => destination.MarkAsDefault, opt => opt.MapFrom(source => source.IsDefaultAddress));
         }
 
-        private void CraeteAddressMap()
+        private void CreateAddressMap()
         {
             CreateMap<UserAddress, AddAddressModel>().ReverseMap();
         }

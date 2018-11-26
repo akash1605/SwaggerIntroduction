@@ -88,12 +88,13 @@ namespace SwaggerIntroduction.Controllers
 
             if (result != 1)
             {
-                Logger.LogWarning("Failed to save data in usermaster table");
+                Logger.LogWarning("Failed to save data in UserMaster table");
                 return BadRequest("Could not input user data");
             }
 
             createUserRequestModel = Mapper.Map(userMaster, createUserRequestModel);
             var userDetails = Mapper.Map<UserDetails>(createUserRequestModel);
+            userDetails.UserId = userMaster.UserId;
             await Repo.AddDataToDataSet(userDetails);
             result = Repo.SaveData();
             if (result == 1)
@@ -105,9 +106,9 @@ namespace SwaggerIntroduction.Controllers
                 }
 
                 createUserRequestModel = Mapper.Map(userDetails, createUserRequestModel);
-                var returnobject = Mapper.Map<CreateUserResponseModel>(createUserRequestModel);
-                returnobject.Token = token;
-                return Created("api/users", returnobject);
+                var returnObject = Mapper.Map<CreateUserResponseModel>(createUserRequestModel);
+                returnObject.Token = token;
+                return Created("api/users", returnObject);
             }
 
             Logger.LogWarning("Failed to save data in user details table");
@@ -287,7 +288,7 @@ namespace SwaggerIntroduction.Controllers
         /// </summary>
         [HttpDelete("address/{id}")]
         [Authorize]
-        [ProducesResponseType( 200)]
+        [ProducesResponseType(200)]
         [ProducesResponseType(500)]
         [ProducesResponseType(404)]
         [ProducesResponseType(401)]
